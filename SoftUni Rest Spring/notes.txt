@@ -1,0 +1,672 @@
+Notes 
+
+
+Spring boot example 
+
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>hello</groupId>
+	<artifactId>spring-boot-example</artifactId>
+	<version>0.0.1-SNAPSHOT</version>
+
+	<parent>
+		<groupId>org.springframework.boot</groupId>
+		<artifactId>spring-boot-starter-parent</artifactId>
+		<version>1.2.1.RELEASE</version>
+	</parent>
+	<dependencies>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-web</artifactId>
+		</dependency>
+	</dependencies>
+
+</project>
+
+
+What is Spring ?
+
+
+package hello;
+
+import org.springframework.stereotype.Service;
+
+@Service	
+public class RandomServiceImpl implements RandomService {
+	
+	public void doSomething() {
+		System.out.println("Doing it ... something");
+	}
+}
+
+
+
+
+@EnableAutoConfiguration
+@Configuration
+@ComponentScan
+public class Application {
+
+	public static void main(String[] args) throws Exception {
+	ConfigurableApplicationContext context = SpringApplication.run(
+				Application.class, args);
+
+	RandomService randomService = context.getBean(RandomService.class);
+	randomService.doSomething();
+}
+
+
+
+package hello;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+@Service
+public class OtherServiceImpl implements OtherService {
+	
+	
+	@Autowired
+	private RandomService randomService;
+	
+	public void otherServiceDointSomething(){
+		System.out.println("other ...");
+		randomService.doSomething();
+	}
+
+}
+
+
+
+WebApp with Spring Boot 
+
+
+SampleController.java
+
+
+package hello;
+
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+@Controller
+@EnableAutoConfiguration
+public class SampleController {
+
+    @RequestMapping("/")
+    @ResponseBody
+    String home() {
+        return "Hello World!";
+    }
+
+    public static void main(String[] args) throws Exception {
+        SpringApplication.run(SampleController.class, args);
+    }
+}
+
+
+
+
+
+
+pom.xml
+
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>org.gochev.rest</groupId>
+	<artifactId>spring-rest-example</artifactId>
+	<version>0.0.1-SNAPSHOT</version>
+
+	<parent>
+		<groupId>org.springframework.boot</groupId>
+		<artifactId>spring-boot-starter-parent</artifactId>
+		<version>1.2.1.RELEASE</version>
+	</parent>
+
+	<dependencies>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-data-rest</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-data-jpa</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.h2database</groupId>
+			<artifactId>h2</artifactId>
+		</dependency>
+	</dependencies>
+
+	<properties>
+		<!-- use UTF-8 for everything -->
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+	</properties>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-maven-plugin</artifactId>
+			</plugin>
+		</plugins>
+	</build>
+
+	<repositories>
+		<repository>
+			<id>spring-releases</id>
+			<url>https://repo.spring.io/libs-release</url>
+		</repository>
+	</repositories>
+	<pluginRepositories>
+		<pluginRepository>
+			<id>spring-releases</id>
+			<url>https://repo.spring.io/libs-release</url>
+		</pluginRepository>
+	</pluginRepositories>
+</project>
+
+Blog.java
+
+package hello;
+
+import java.util.Collection;
+import java.util.HashSet;
+
+import javax.persistence.CascadeType;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.OneToMany;
+
+@Entity
+public class Blog {
+
+	@Id
+	@GeneratedValue(strategy = GenerationType.AUTO)
+	private long id;
+
+	private String name;
+	
+	private String description;
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	public long getId() {
+		return id;
+	}
+
+	public void setId(long id) {
+		this.id = id;
+	}
+
+
+	public String getDescription() {
+		return description;
+	}
+
+	public void setDescription(String description) {
+		this.description = description;
+	}
+
+}
+
+
+BlogRepository.java
+
+package hello;
+
+import java.util.List;
+
+import org.springframework.data.repository.PagingAndSortingRepository;
+import org.springframework.data.repository.query.Param;
+import org.springframework.data.rest.core.annotation.RepositoryRestResource;
+
+@RepositoryRestResource(collectionResourceRel = "blog", path = "blog")
+public interface BlogRepository extends PagingAndSortingRepository<Blog, Long> {
+
+	List<Blog> findByName(@Param("name") String name);
+
+}
+
+Applicaiton.java
+
+package hello;
+
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
+import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
+import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
+import org.springframework.data.rest.webmvc.config.RepositoryRestMvcConfiguration;
+
+@Configuration
+@EnableJpaRepositories
+@Import(RepositoryRestMvcConfiguration.class)
+@EnableAutoConfiguration
+public class Application {
+
+	public static void main(String[] args) {
+		ConfigurableApplicationContext context = SpringApplication.run(Application.class, args);
+	}
+}
+
+
+
+
+curl -i -X POST -H "Content-Type:application/json" -d '{  "name" : "My first blog", "description" : "bla bla some description" }' http://localhost:8080/blog
+
+curl -i -X POST -H "Content-Type:application/json" -d '{  "name" : "test" }' http://localhost:8080/blog
+
+curl http://localhost:8080/blog/search/findByName?name=test
+
+curl -X PUT -H "Content-Type:application/json" -d '{ "name": "Other" }' http://localhost:8080/blog/1
+
+curl http://localhost:8080/blog/
+
+curl -X DELETE http://localhost:8080/blog/1
+
+curl -i -X POST -H "Content-Type:application/json" -d '{  "name" : "My first blog", "description" : "bla bla some description" }' http://localhost:8080/blog
+
+curl http://localhost:8080/blog/
+
+curl -X PATCH -H "Content-Type:application/json" -d '{ "name" : "test" }' http://localhost:8080/blog/3
+
+
+
+BlogPost.java
+package hello;
+
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+
+@Entity
+public class BlogPost {
+
+	@Id
+	@GeneratedValue(strategy = GenerationType.AUTO)
+	private long id;
+
+	private String title;
+	private String content;
+	
+
+	@ManyToOne(fetch = FetchType.LAZY, targetEntity = Blog.class)
+    @JoinColumn(name = "blog", nullable = true, referencedColumnName = "id")
+    private Blog blog;
+	
+	public String getTitle() {
+		return title;
+	}
+	public void setTitle(String title) {
+		this.title = title;
+	}
+	public String getContent() {
+		return content;
+	}
+	public void setContent(String content) {
+		this.content = content;
+	}
+	public Blog getBlog() {
+		return blog;
+	}
+	public void setBlog(Blog blog) {
+		this.blog = blog;
+	}
+
+}
+
+
+
+
+
+Blog.java
+@OneToMany(mappedBy = "blog", fetch = FetchType.LAZY, targetEntity = BlogPost.class, cascade = CascadeType.REMOVE)
+	private Collection<BlogPost> blogPosts = new HashSet<BlogPost>();
+	
+public Collection<BlogPost> getBlogPosts() {
+		return blogPosts;
+	}
+
+	public void setBlogPosts(Collection<BlogPost> blogPosts) {
+		this.blogPosts = blogPosts;
+	}
+	
+
+
+BlogPostRepoistory.java
+
+package hello;
+
+import org.springframework.data.repository.PagingAndSortingRepository;
+import org.springframework.data.rest.core.annotation.RepositoryRestResource;
+
+@RepositoryRestResource(collectionResourceRel = "blogpost", path = "blogpost")
+public interface BlogPostRepository extends PagingAndSortingRepository<BlogPost, Long> {
+
+}
+
+
+curl -i -X POST -H "Content-Type:application/json" -d '{  "title": "hello", "content" : "Hello world soft uni blog post", "blog" : "/blog/3" }' http://localhost:8080/blogpost
+
+curl -i -X POST -H "Content-Type:application/json" -d '{  "title": "hello2", "content" : "bla bla", "blog" : "/blog/3" }' http://localhost:8080/blogpost
+
+
+pom.xml
+
+<dependency>
+			<groupId>com.zaxxer</groupId>
+			<artifactId>HikariCP</artifactId>
+			<version>2.2.5</version>
+			<scope>compile</scope>
+		</dependency>
+		
+		<dependency>
+			<groupId>mysql</groupId>
+			<artifactId>mysql-connector-java</artifactId>
+			<version>${mysql-connector-java.version}</version>
+		</dependency>
+		
+		
+		...
+		<properties>
+		
+		..
+			<mysql-connector-java.version>5.1.23</mysql-connector-java.version>
+		</properties>
+		
+
+Update application.java
+
+package hello;
+
+import java.beans.PropertyVetoException;
+import java.io.IOException;
+
+import javax.persistence.EntityManagerFactory;
+import javax.sql.DataSource;
+
+import org.hibernate.cfg.Environment;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
+import org.springframework.boot.orm.jpa.EntityScan;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
+import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
+import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
+import org.springframework.data.rest.webmvc.config.RepositoryRestMvcConfiguration;
+import org.springframework.data.web.config.EnableSpringDataWebSupport;
+import org.springframework.instrument.classloading.InstrumentationLoadTimeWeaver;
+import org.springframework.orm.jpa.JpaVendorAdapter;
+import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
+import org.springframework.orm.jpa.vendor.HibernateJpaDialect;
+import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
+import org.springframework.transaction.annotation.EnableTransactionManagement;
+
+import com.zaxxer.hikari.HikariDataSource;
+
+@Configuration
+@EnableJpaRepositories
+@Import(RepositoryRestMvcConfiguration.class)
+@EnableAutoConfiguration
+public class Application {
+
+	@Autowired
+	private ApplicationContext applicationContext;
+
+	public static void main(String[] args) {
+		ConfigurableApplicationContext context = SpringApplication.run(
+				Application.class, args);
+
+		// BlogRepository blogRepository =
+		// context.getBean(BlogRepository.class);
+		//
+		// Blog blog = new Blog();
+		// blog.setName("my first blog");
+		// blogRepository.save(blog);
+	}
+
+	@Bean(name = { "dataSource" }, destroyMethod = "close")
+	protected DataSource dataSource() throws PropertyVetoException {
+		final HikariDataSource dataSource = new HikariDataSource();
+		dataSource.setDriverClassName(applicationContext.getEnvironment()
+				.getProperty("javax.persistence.jdbc.driver"));
+		dataSource.setJdbcUrl(applicationContext.getEnvironment().getProperty(
+				"javax.persistence.jdbc.url"));
+		dataSource.setUsername(applicationContext.getEnvironment().getProperty(
+				"javax.persistence.jdbc.user"));
+		dataSource.setPassword(applicationContext.getEnvironment().getProperty(
+				"javax.persistence.jdbc.password"));
+
+		return dataSource;
+	}
+
+	@Bean(name = { "jpaVendorAdapter" })
+	protected JpaVendorAdapter defaultJpaVendorAdapter() {
+		final HibernateJpaVendorAdapter hibernateJpaVendorAdapter = new HibernateJpaVendorAdapter();
+		hibernateJpaVendorAdapter.setShowSql(false);
+		hibernateJpaVendorAdapter.setGenerateDdl(true);
+		hibernateJpaVendorAdapter
+				.setDatabasePlatform(org.hibernate.dialect.MySQL5Dialect.class
+						.getCanonicalName());
+
+		return hibernateJpaVendorAdapter;
+	}
+
+	@Bean(name = { "entityManagerFactory" })
+	protected EntityManagerFactory entityManagerFactory(DataSource dataSource,
+			Environment env) throws PropertyVetoException, IOException {
+		final LocalContainerEntityManagerFactoryBean entityManagerFactory = new LocalContainerEntityManagerFactoryBean();
+		entityManagerFactory.setDataSource(dataSource);
+		entityManagerFactory.setJpaVendorAdapter(defaultJpaVendorAdapter());
+		entityManagerFactory.setJpaDialect(new HibernateJpaDialect());
+		entityManagerFactory
+				.setLoadTimeWeaver(new InstrumentationLoadTimeWeaver());
+		entityManagerFactory
+				.setPersistenceProviderClass(org.hibernate.jpa.HibernatePersistenceProvider.class);
+
+		entityManagerFactory.afterPropertiesSet();
+
+		return entityManagerFactory.getObject();
+	}
+}
+
+add application.properties
+
+javax.persistence.jdbc.driver=com.mysql.jdbc.Driver
+javax.persistence.jdbc.url=jdbc:mysql://localhost:3306/testme?autoReconnect=true&amp;useUnicode=true&amp;characterEncoding=UTF-8&amp;connectionCollation=utf8_general_ci&amp;characterSetResults=utf8&amp;autoDeserialize=true&useConfigs=maxPerformance
+javax.persistence.jdbc.user=root
+javax.persistence.jdbc.password=admin
+
+spring.boot.admin.url=http://localhost:8080
+
+
+
+Show it works with extjs
+
+
+
+/spring-rest-example/src/main/webapp/start.html
+
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+        <title >My Products</title>
+        
+       
+    </head>
+    <body>
+			Wazaaa
+    </body>
+</html>
+
+
+Update
+
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+        <title >My Products</title>
+        
+        <link rel="stylesheet" href="http://cdn.sencha.io/try/extjs/4.0.7/resources/css/ext-all-gray.css" />
+        <link rel="stylesheet" href="resources/css/app.css" />
+        
+        <script src="http://cdn.sencha.io/try/extjs/4.0.7/ext-all.js"></script>
+        <script type="text/javascript" src="app/app.js"></script>
+    </head>
+    <body>
+
+    </body>
+</html>
+
+
+lets create the app.js
+
+Ext.require(['Ext.data.*', 'Ext.grid.*']);
+
+Ext.define('Blog', {
+    extend: 'Ext.data.Model',
+    fields: [{
+            name: 'id',
+            type: 'int',
+            useNull: true
+        }, 'name', 'description'],
+    validations: [{
+            type: 'length',
+            field: 'name',
+            min: 1
+        }, {
+            type: 'length',
+            field: 'description',
+            min: 1
+        }]
+});
+
+Ext.onReady(function() {
+
+    var store = Ext.create('Ext.data.Store', {
+        autoLoad: true,
+        autoSync: true,
+        model: 'Blog',
+        proxy: {
+            type: 'rest',
+            url: 'blog',
+            extraParams: {
+                page: 0
+            },
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            reader: {
+                type: 'json',
+                root: '_embedded.blog'
+            },
+            writer: {
+                type: 'json'
+            }
+        }
+    });
+
+    var rowEditing = Ext.create('Ext.grid.plugin.RowEditing');
+
+    var grid = Ext.create('Ext.grid.Panel', {
+        renderTo: document.body,
+        plugins: [rowEditing],
+        width: 400,
+        height: 300,
+        frame: true,
+        title: 'Blogs',
+        store: store,
+        columns: [{
+                text: 'ID',
+                width: 40,
+                sortable: true,
+                dataIndex: 'id'
+            }, {
+                text: 'Name',
+                flex: 1,
+                sortable: true,
+                dataIndex: 'name',
+                field: {
+                    xtype: 'textfield'
+                }
+            }, {
+                header: 'Description',
+                width: 200,
+                sortable: true,
+                dataIndex: 'description',
+                field: {
+                    xtype: 'textfield'
+                }
+            }],
+        dockedItems: [{
+                xtype: 'toolbar',
+                items: [{
+                        text: 'Add',
+                        iconCls: 'icon-add',
+                        handler: function() {
+                            // empty record
+                            store.insert(0, new Blog());
+                            rowEditing.startEdit(0, 0);
+                        }
+                    }, '-', {
+                        text: 'Delete',
+                        iconCls: 'icon-delete',
+                        handler: function() {
+                            var selection = grid.getView().getSelectionModel().getSelection()[0];
+                            if (selection) {
+                                store.remove(selection);
+                            }
+                        }
+                    }]
+            }]
+    });
+});
+
+
+but wait it doesnt work ?!?! :) cuz id is missing
+
+a little hack :(
+Application.java
+
+public class Application extends RepositoryRestMvcConfiguration {
+..
+
+
+	@Override
+	protected void configureRepositoryRestConfiguration(
+			RepositoryRestConfiguration config) {
+		config.exposeIdsFor(Blog.class);
+	}
+	
+	..
+	
+	
+
+	
