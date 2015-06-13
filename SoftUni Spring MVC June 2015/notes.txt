@@ -1,0 +1,1393 @@
+dynamic web application on tomcat 8
+
+ServletLifeCycleExample.java
+
+package org.gochev;
+
+import java.io.IOException;
+
+import javax.servlet.ServletConfig;
+import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+/**
+ * Servlet implementation class ServletLifeCycleExample
+ */
+@WebServlet("/ServletLifeCycleExample")
+public class ServletLifeCycleExample extends HttpServlet {
+
+    @Override
+    public void init(ServletConfig config) throws ServletException {
+        super.init(config);
+        getServletContext().log("init() called");
+    }
+ 
+    @Override
+    protected void service(HttpServletRequest request, 
+                        HttpServletResponse response)
+            throws ServletException, IOException {
+        getServletContext().log("service() called");
+        response.getWriter().write("Hello world !");
+    }
+ 
+    @Override
+    public void destroy() {
+        getServletContext().log("destroy() called");
+    }
+ 
+
+}
+
+
+
+JSP example
+
+
+hello.jsp
+
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+	pageEncoding="UTF-8"%>
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>Insert title here</title>
+</head>
+<body>
+	<p>Counting to three:</p>
+	<% for (int i=1; i<4; i++) { %>
+	<p>
+		This number is
+		<%= i %>.
+	</p>
+	<% } %>
+
+	<p>OK.</p>
+</body>
+</html>
+
+
+
+JSTL example
+
+copy the two jars
+
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>Insert title here</title>
+</head>
+<body>
+	<p>Counting to three:</p>
+	<c:forEach begin="1" end="3" var="i">
+		<p>
+			This number is ${i}
+		</p>
+	</c:forEach>
+
+	<p>OK.</p>
+</body>
+</html>
+
+
+
+MVCExample
+
+
+ControllerServlet.java
+
+package org.gochev;
+
+import java.io.IOException;
+import java.io.PrintWriter;
+
+import javax.servlet.RequestDispatcher;
+import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+/**
+ * Servlet implementation class ControllerServlet
+ */
+@WebServlet("/ControllerServlet")
+public class ControllerServlet extends HttpServlet {
+	 protected void doPost(HttpServletRequest request, HttpServletResponse response)  
+	            throws ServletException, IOException {  
+	        response.setContentType("text/html");  
+	          
+	        String name=request.getParameter("name");  
+	        String password=request.getParameter("password");  
+	          
+	        LoginBean bean=new LoginBean();  
+	        bean.setName(name);  
+	        bean.setPassword(password);  
+	        
+	        request.setAttribute("bean",bean);  
+	          
+	        boolean status=bean.validate();  
+	          
+	        if(status){  
+	            RequestDispatcher rd=request.getRequestDispatcher("login-success.jsp");  
+	            rd.forward(request, response);  
+	        }  
+	        else{  
+	            RequestDispatcher rd=request.getRequestDispatcher("login-error.jsp");  
+	            rd.forward(request, response);  
+	        }  
+	      
+	    }  
+	  
+	 	//this was common in the old days
+	    @Override  
+	    protected void doGet(HttpServletRequest req, HttpServletResponse resp)  
+	            throws ServletException, IOException {  
+	        doPost(req, resp);  
+	    }  
+
+}
+
+
+LoginBean.java
+
+package org.gochev;
+
+public class LoginBean {
+	private String name, password;
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	public String getPassword() {
+		return password;
+	}
+
+	public void setPassword(String password) {
+		this.password = password;
+	}
+
+	public boolean validate() {
+		if (password.equals("admin")) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+}
+
+
+
+index.jsp
+
+
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+	pageEncoding="UTF-8"%>
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>Insert title here</title>
+</head>
+<body>
+
+	<form action="ControllerServlet" method="post">
+		Name:
+		<input type="text" name="name"><br> 
+		Password:
+		<input
+			type="password" name="password"><br> 
+		<input
+			type="submit" value="login">
+	</form>
+
+</body>
+</html>
+
+
+
+login-error.jsp
+
+
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>Insert title here</title>
+</head>
+<body>
+<p>Sorry! username or password error</p>  
+<%@ include file="index.jsp" %>  
+</body>
+</html>
+
+
+login-success.jsp
+
+
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
+<%@page import="org.gochev.LoginBean"%>  
+    
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>Insert title here</title>
+</head>
+<body>
+	<p>You are successfully logged in!</p>
+	<%
+		LoginBean bean = (LoginBean) request.getAttribute("bean");
+		out.print("Welcome, " + bean.getName());
+	%>
+</body>
+</html>
+
+
+
+
+
+SpringExample
+
+copy the jars
+
+
+FIRST SHOW WITHOUT SPRING !!!!
+
+package org.gochev;
+
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+
+public class MainClass {
+	public static void main(String[] args) {
+		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(
+				"org.gochev");
+	}
+}
+
+
+UserService.java
+
+package org.gochev;
+
+import org.springframework.stereotype.Service;
+
+@Service
+public class UserService {
+	
+	public void findUserByEmail(String email){
+		System.out.println("wohoo " + email);
+	}
+}
+
+...
+
+
+context.getBean(UserService.class);...
+..
+
+
+
+LoginService.java
+
+package org.gochev;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+@Service
+public class LoginService {
+
+	@Autowired
+	private UserService userService;
+	
+	public void login(){
+		userService.findUserByEmail("ebasi");
+	}
+}
+
+
+
+
+Spring MVC example
+
+lets add a Configuration
+
+
+@Configuration
+@ComponentScan("org.gochev")
+@EnableWebMvc 
+public class WebInitializer implements WebApplicationInitializer {
+    
+	public void onStartup(ServletContext servletContext)
+			throws ServletException {
+		AnnotationConfigWebApplicationContext ctx = new AnnotationConfigWebApplicationContext();  
+        ctx.register(WebInitializer.class);  
+        ctx.setServletContext(servletContext);    
+        Dynamic servlet = servletContext.addServlet("dispatcher", new DispatcherServlet(ctx));  
+        servlet.addMapping("/");  
+        servlet.setLoadOnStartup(1);
+	}
+
+}
+
+
+A controller :
+
+package org.gochev;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.ModelMap;
+
+
+@Controller
+public class HomeController {
+    
+   @RequestMapping(value = "/home", method = RequestMethod.GET)
+   public String index(ModelMap map) {
+       map.put("msg", "Hello Spring 4 Web MVC!");
+       return "index.jsp";
+   }
+}
+
+
+and a jsp
+
+
+<%@page contentType="text/html" pageEncoding="UTF-8"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<c:set var="cp" value="${pageContext.request.servletContext.contextPath}" scope="request" />
+
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <title>Spring 4 Web MVC via Annotations</title>
+        <link rel="stylesheet" type="text/css" href="{cp}/resources/css/site.css" />
+        <script src="${cp}/resources/js/js.js"></script>
+    </head>
+    <body>
+        <h4>Spring 4 Web MVC via Annotations</h4>
+        Spring says: <span class="blue">${msg}</span>
+    </body>
+</html>
+
+
+
+The problem is ... it is not good to put a jsps in webapp since they are accessible.
+Instead we have to put them in WEB-INF for example in subfolder "jsp" or "pages"
+
+To make this to work we have to add :
+
+@Bean
+//	public UrlBasedViewResolver setupViewResolver() {
+//		UrlBasedViewResolver resolver = new UrlBasedViewResolver();
+//		resolver.setPrefix("/WEB-INF/jsp/");
+//		resolver.setSuffix(".jsp");
+//		resolver.setViewClass(JstlView.class);
+//		return resolver;
+//	}
+
+
+and change the controller to no longer pass ".jsp"
+ 
+
+@Controller
+public class HomeController {
+    
+   @RequestMapping(value = "/home", method = RequestMethod.GET)
+   public String index(ModelMap map) {
+       map.put("msg", "Hello Spring 4 Web MVC!");
+       return "index";
+   }
+}
+
+
+We can extract everything in a diferent config file
+
+package org.gochev;  
+  
+import org.springframework.context.annotation.Bean;  
+import org.springframework.context.annotation.ComponentScan;  
+import org.springframework.context.annotation.Configuration;  
+import org.springframework.web.servlet.config.annotation.EnableWebMvc;  
+import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
+import org.springframework.web.servlet.view.JstlView;  
+import org.springframework.web.servlet.view.UrlBasedViewResolver;  
+  
+@Configuration
+@ComponentScan("org.gochev")
+@EnableWebMvc   
+public class Config extends WebMvcConfigurerAdapter {  
+      
+    @Bean  
+    public UrlBasedViewResolver setupViewResolver() {  
+        UrlBasedViewResolver resolver = new UrlBasedViewResolver();  
+        resolver.setPrefix("/WEB-INF/jsp/");  
+        resolver.setSuffix(".jsp");  
+        resolver.setViewClass(JstlView.class);  
+        return resolver;  
+    }  
+    
+    @Override
+    public void addResourceHandlers(ResourceHandlerRegistry registry) {
+        registry.addResourceHandler("/resources/**").addResourceLocations("/WEB-INF/resources/*");
+    }
+}  
+
+it's good to hide our static resources as well :)
+
+And change the web initializer to not include spring annotaitons
+
+
+import javax.servlet.ServletRegistration.Dynamic;
+
+import org.springframework.web.WebApplicationInitializer;
+import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
+import org.springframework.web.servlet.DispatcherServlet;
+  
+public class WebInitializer implements WebApplicationInitializer {
+    
+	public void onStartup(ServletContext servletContext)
+			throws ServletException {
+		AnnotationConfigWebApplicationContext ctx = new AnnotationConfigWebApplicationContext();  
+        ctx.register(Config.class);  
+        ctx.setServletContext(servletContext);    
+        Dynamic servlet = servletContext.addServlet("dispatcher", new DispatcherServlet(ctx));  
+        servlet.addMapping("/");  
+        servlet.setLoadOnStartup(1);
+	}
+}
+
+Ok next
+
+@ResponseBody fun .. 
+what if we dont want to use a view and use a view resolver 
+
+   @RequestMapping("/op")
+   @ResponseBody
+   public String op(){
+	   return "opaaa";
+   }
+
+
+
+
+Ok for the next examples of Spring MVC lets use spring boot!
+
+
+
+new maven project.
+pom.xml
+
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>org.gochev.softuni.example</groupId>
+	<artifactId>spring-rad</artifactId>
+	<version>0.0.1-SNAPSHOT</version>
+
+	<parent>
+		<groupId>org.springframework.boot</groupId>
+		<artifactId>spring-boot-starter-parent</artifactId>
+		<version>1.2.2.RELEASE</version>
+	</parent>
+	<dependencies>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-web</artifactId>
+		</dependency>
+		
+		
+		<!-- make jsp to work ;) -->
+		<dependency>
+			<groupId>org.apache.tomcat.embed</groupId>
+			<artifactId>tomcat-embed-jasper</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<!-- jstl is a "must" :)) -->
+		<dependency>
+			<groupId>javax.servlet</groupId>
+			<artifactId>jstl</artifactId>
+			<scope>provided</scope>
+		</dependency>
+	</dependencies>
+
+</project>
+
+package org.gochev;
+
+import hello.Application;
+
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
+import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.Configuration;
+
+@Configuration
+@EnableAutoConfiguration
+@ComponentScan
+public class Application {
+	public static void main(String[] args) {
+		SpringApplication.run(Application.class, args);
+	}
+}
+
+
+add a controller
+
+package org.gochev;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+@Controller
+public class SubmissionController {
+
+	@ResponseBody
+	@RequestMapping("/")
+	public String register(){
+		return "wohoo";
+	}
+}
+
+
+
+
+//add JPA
+
+<dependency>
+			<groupId>org.springframework.data</groupId>
+			<artifactId>spring-data-jpa</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.hibernate</groupId>
+			<artifactId>hibernate-entitymanager</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.zaxxer</groupId>
+			<artifactId>HikariCP</artifactId>
+			<scope>compile</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>mysql</groupId>
+			<artifactId>mysql-connector-java</artifactId>
+		</dependency>
+
+
+
+applicaiton.properties
+
+spring.datasource.url=jdbc:mysql://localhost:3306/softuni?autoReconnect=true&amp;useUnicode=true&amp;characterEncoding=UTF-8&amp;connectionCollation=utf8_general_ci&amp;characterSetResults=utf8&amp;autoDeserialize=true&useConfigs=maxPerformance
+spring.datasource.username=root
+spring.datasource.password=admin
+spring.datasource.driver-class-name=com.mysql.jdbc.Driver
+spring.jpa.open-in-view=false
+spring.jpa.show-sql=false
+spring.jpa.database-platform=org.hibernate.dialect.MySQL5Dialect
+spring.jpa.generate-ddl=true
+spring.jpa.hibernate.ddl-auto=none
+spring.jpa.hibernate.naming_strategy=org.hibernate.cfg.DefaultNamingStrategy
+spring.jpa.properties.javax.persistence.sharedCache.mode=ENABLE_SELECTIVE
+spring.jpa.properties.hibernate.hikari.dataSource.cachePrepStmts=true
+spring.jpa.properties.hibernate.hikari.dataSource.prepStmtCacheSize=250
+spring.jpa.properties.hibernate.hikari.dataSource.prepStmtCacheSqlLimit=2048
+spring.jpa.properties.hibernate.hikari.dataSource.useServerPrepStmts=true
+spring.jpa.properties.hibernate.generate_statistics=false
+
+# JTA
+spring.jta.enabled=true
+
+
+
+
+
+drop/create database
+
+
+
+q da napraim edno Entity
+package org.gochev.model;
+
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+
+@Entity
+public class Submission {
+	@Id
+	@GeneratedValue(strategy = GenerationType.AUTO)
+	private Long id;
+	
+	private String headline;
+	
+	private String description;
+	
+	private String speaker;
+	
+	private String bio;
+	
+	private SessionLevel level;
+
+	public Long getId() {
+		return id;
+	}
+
+	public void setId(Long id) {
+		this.id = id;
+	}
+
+	public String getHeadline() {
+		return headline;
+	}
+
+	public void setHeadline(String headline) {
+		this.headline = headline;
+	}
+
+	public String getDescription() {
+		return description;
+	}
+
+	public void setDescription(String description) {
+		this.description = description;
+	}
+
+	public String getSpeaker() {
+		return speaker;
+	}
+
+	public void setSpeaker(String speaker) {
+		this.speaker = speaker;
+	}
+
+	public String getBio() {
+		return bio;
+	}
+
+	public void setBio(String bio) {
+		this.bio = bio;
+	}
+
+	public SessionLevel getLevel() {
+		return level;
+	}
+
+	public void setLevel(SessionLevel level) {
+		this.level = level;
+	}
+}
+
+
+
+
+package org.gochev.model;
+
+public enum SessionLevel {
+
+	BEGINNER, INTERMEDIATE, ADVANCED;
+
+}
+
+
+Create an interface for repository
+
+package org.gochev.repo;
+
+
+import org.gochev.model.Submission;
+import org.springframework.data.repository.PagingAndSortingRepository;
+import org.springframework.stereotype.Repository;
+
+@Repository(value = SubmissionRepository.NAME)
+public interface SubmissionRepository extends PagingAndSortingRepository<Submission, Long> {
+
+	String NAME = "submissionRepository";
+
+}
+
+
+Change the controller .. lets make a jsp.
+
+
+
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+	pageEncoding="UTF-8"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ taglib prefix="form" uri="http://www.springframework.org/tags/form"%>
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>Submit submission</title>
+</head>
+<body>
+	<form:form commandName="submission" method="post" action="/submit">
+		<fieldset>
+        <dl>
+            <dt>
+                <label for="title">Title</label>
+            </dt>
+            <dd>
+                <form:input path="title" />
+            </dd>
+        </dl>
+         <dl>
+            <dt>
+                <label for="headline">Headline</label>
+            </dt>
+            <dd>
+                <form:input path="headline" />
+            </dd>
+        </dl>
+        <dl>
+            <dt>
+                <label for="description">Abstract</label>
+            </dt>
+            <dd>
+                <form:textarea path="description"  style="width:80%" rows="5"/>
+            </dd>
+        </dl>
+        <dl>
+            <dt>
+                <label for="level">Session level</label>
+            </dt>
+            <dd>
+                <form:select path="level" items="${levels}"/>
+            </dd>
+        </dl>
+        <dl>
+            <dt>
+                <label for="email">Email</label>
+            </dt>
+            <dd>
+                <form:input path="email" />
+            </dd>
+        </dl>
+        <dl>
+            <dt>
+                <label for="speaker">speaker</label>
+            </dt>
+            <dd>
+                <form:input path="speaker" />
+            </dd>
+        </dl>
+        <dl>
+            <dt>
+                <label for="bio">Bio</label>
+            </dt>
+            <dd>
+                <form:textarea path="bio" style="width:80%" rows="5" />
+            </dd>
+        </dl>
+        <button type="submit">Submit</button>
+    </fieldset>
+	</form:form>
+</body>
+</html>
+
+Change the controller
+
+package org.gochev;
+
+import org.gochev.model.Submission;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+@Controller
+public class SubmissionController {
+
+	@ResponseBody
+	@RequestMapping("/")
+	public String register() {
+		return "wohoo";
+	}
+
+	@RequestMapping(value = "/submit", method = RequestMethod.GET)
+	public String view(){
+		return "register.jsp";
+	}
+	
+	@ResponseBody
+	@RequestMapping(value = "/submit", method = RequestMethod.POST)
+	public String submit(Submission submission) {
+		return "you submitted your submission " + submission.getTitle();
+	}
+}
+
+
+
+
+
+but this wont work..
+
+
+variant 1 :
+
+	@ModelAttribute("submission")
+	public Submission getModel(){
+		return new Submission();
+	}
+	
+
+
+variant 2
+
+
+@RequestMapping(value = "/submit", method = RequestMethod.GET)
+	public String view(Model model){
+		model.addAttribute("submission",new Submission());
+		return "register.jsp";
+	}
+
+
+
+
+toq sessionlevel input ne me kefi
+
+
+
+
+<form:select path="level" items="${levels}"/>
+
+
+
+model.addAttribute("levels", SessionLevel.values());
+
+
+debug da vidim che se popalva
+
+oh okei de da go savenem.
+
+New Controller
+
+package org.gochev;
+
+import org.gochev.model.SessionLevel;
+import org.gochev.model.Submission;
+import org.gochev.repo.SubmissionRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+@Controller
+public class SubmissionController {
+	
+	@Autowired
+	private SubmissionRepository submissionRepository;
+
+	@ResponseBody
+	@RequestMapping("/")
+	public String register() {
+		return "wohoo";
+	}
+
+//	@ModelAttribute("submission")
+//	public Submission getModel(){
+//		return new Submission();
+//	}
+//	
+	@RequestMapping(value = "/submit", method = RequestMethod.GET)
+	public String view(Model model){
+		model.addAttribute("levels", SessionLevel.values());
+		model.addAttribute("submission",new Submission());
+		return "register.jsp";
+	}
+	
+	@ResponseBody
+	@RequestMapping(value = "/submit", method = RequestMethod.POST)
+	public String submit(Submission submission) {
+		submissionRepository.save(submission);
+		
+		return "you submitted your submission " + submission.getTitle();
+	}
+}
+
+
+
+da vidim che e saved
+
+
+
+
+
+
+VALIDATION
+
+
+1vo )describe Submission na bazata
+
+update na modela
+
+package org.gochev.model;
+
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.validation.constraints.NotNull;
+
+import org.hibernate.validator.constraints.Email;
+import org.hibernate.validator.constraints.Length;
+import org.hibernate.validator.constraints.NotEmpty;
+
+
+@Entity
+public class Submission {
+	@Id
+	@GeneratedValue(strategy = GenerationType.AUTO)
+	private Long id;
+	
+	@NotEmpty
+	private String title;
+	
+	private String headline;
+	
+	@Length(min = 1, max = 10)
+	private String description;
+	
+	@NotEmpty
+	private String speaker;
+	
+	private String bio;
+	
+	@Email
+	private String email;
+	
+	@NotNull
+	private SessionLevel level;
+
+	public Long getId() {
+		return id;
+	}
+
+	public void setId(Long id) {
+		this.id = id;
+	}
+
+	public String getHeadline() {
+		return headline;
+	}
+
+	public void setHeadline(String headline) {
+		this.headline = headline;
+	}
+
+	public String getDescription() {
+		return description;
+	}
+
+	public void setDescription(String description) {
+		this.description = description;
+	}
+
+	public String getSpeaker() {
+		return speaker;
+	}
+
+	public void setSpeaker(String speaker) {
+		this.speaker = speaker;
+	}
+
+	public String getBio() {
+		return bio;
+	}
+
+	public void setBio(String bio) {
+		this.bio = bio;
+	}
+
+	public SessionLevel getLevel() {
+		return level;
+	}
+
+	public void setLevel(SessionLevel level) {
+		this.level = level;
+	}
+
+	public String getEmail() {
+		return email;
+	}
+
+	public void setEmail(String email) {
+		this.email = email;
+	}
+
+	public String getTitle() {
+		return title;
+	}
+
+	public void setTitle(String title) {
+		this.title = title;
+	}
+}
+
+
+2ro) syzdavame sq zapis
+
+
+q Describe !
+
+3to) q sybmit s greshen content
+
+pokaji stacktrace-a
+
+
+dobavi spring validation
+
+
+done.jsp
+
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+	pageEncoding="UTF-8"%>
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>Submit submission</title>
+</head>
+<body>
+	Registered
+</body>
+</html>
+
+update na controller metoda
+
+
+@RequestMapping(value = "/submit", method = RequestMethod.POST)
+	public String submit(@Valid Submission submission, BindingResult submissionResut) {
+		if(submissionResut.hasErrors()){
+			return "register.jsp";
+		}
+		submissionRepository.save(submission);
+		
+		return "done.jsp";
+	}
+
+
+
+ama nqma greshki
+
+pokaji greshktie
+
+
+
+
+
+
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+	pageEncoding="UTF-8"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ taglib prefix="form" uri="http://www.springframework.org/tags/form"%>
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>Submit submission</title>
+</head>
+<body>
+	<form:form commandName="submission" method="post" action="/submit">
+		<fieldset>
+		 <p>
+            <form:errors />
+        </p>
+        <dl>
+            <dt>
+                <label for="title">Title</label>
+            </dt>
+            <dd>
+                <form:input path="title" />
+            </dd>
+        </dl>
+         <dl>
+            <dt>
+                <label for="headline">Headline</label>
+            </dt>
+            <dd>
+                <form:input path="headline" />
+            </dd>
+        </dl>
+        <dl>
+            <dt>
+                <label for="description">Abstract</label>
+            </dt>
+            <dd>
+                <form:textarea path="description"  style="width:80%" rows="5"/>
+            </dd>
+        </dl>
+        <dl>
+            <dt>
+                <label for="level">Session level</label>
+            </dt>
+            <dd>
+                <form:select path="level" items="${levels}"/>
+            </dd>
+        </dl>
+        <dl>
+            <dt>
+                <label for="email">Email</label>
+            </dt>
+            <dd>
+                <form:input path="email" />
+            </dd>
+        </dl>
+        <dl>
+            <dt>
+                <label for="speaker">speaker</label>
+            </dt>
+            <dd>
+                <form:input path="speaker" />
+                <form:errors path="speaker"/>
+            </dd>
+        </dl>
+        <dl>
+            <dt>
+                <label for="bio">Bio</label>
+            </dt>
+            <dd>
+                <form:textarea path="bio" style="width:80%" rows="5" />
+            </dd>
+        </dl>
+        <button type="submit">Submit</button>
+    </fieldset>
+	</form:form>
+</body>
+</html>
+
+
+return JSON / REDIRECT/ 
+
+
+@ResponseBody
+	@RequestMapping(value = "/get", method = RequestMethod.GET)
+	public Submission submit(@RequestParam Long id) {
+		return submissionRepository.findOne(id);
+	}
+
+
+http://localhost:8080/get?id=1
+
+
+Path Param ?
+
+@ResponseBody
+	@RequestMapping(value = "/get/{id}", method = RequestMethod.GET)
+	public Submission submit(@PathVariable Long id) {
+		return submissionRepository.findOne(id);
+	}
+
+
+http://localhost:8080/get/1
+
+
+
+Redirect (change the done to not be forward)
+
+		return "redirect:done.jsp";
+
+
+da dobavim neshto v modela.. bez redirecta
+
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+	pageEncoding="UTF-8"%>
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>Submit submission</title>
+</head>
+<body>
+	Registered ${submissionTitle}
+</body>
+</html>
+
+
+@RequestMapping(value = "/submit", method = RequestMethod.POST)
+	public String submit(@Valid Submission submission, BindingResult submissionResut, Model model) {
+		if(submissionResut.hasErrors()){
+			return "register.jsp";
+		}
+		submissionRepository.save(submission);
+		
+		model.addAttribute("submissionTitle", submission.getTitle());
+		return "done.jsp";
+	}
+
+ama ako praim redirect toq title go nqma
+
+
+SMENI SI redirect: RYCHNO CHE NEXT !!! e s redirect attributes !!!
+ 
+
+@RequestMapping(value = "/submit", method = RequestMethod.POST)
+	public String submit(@Valid Submission submission, BindingResult submissionResut, RedirectAttributes redirectAttributes) {
+		if(submissionResut.hasErrors()){
+			return "register.jsp";
+		}
+		submissionRepository.save(submission);
+		
+		redirectAttributes.addAttribute("submissionTitle", submission.getTitle());
+		return "redirect:done.jsp";
+	}
+
+
+ 
+redirectAttribtues se podavat kato params tr da promenim done.jsp
+
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+	pageEncoding="UTF-8"%>
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>Submit submission</title>
+</head>
+<body>
+	Registered ${param.submissionTitle}
+</body>
+</html>
+
+
+Usually we do not redirect to JSPS .. but to actions so lets make an action
+
+
+
+@RequestMapping(value = "/done" , method = RequestMethod.GET)
+    public String done() {
+		return "done.jsp";
+    }
+
+
+
+UPDATE 
+
+@RequestMapping(value = "/submit", method = RequestMethod.POST)
+	public String submit(@Valid Submission submission, BindingResult submissionResut, RedirectAttributes redirectAttributes) {
+		if(submissionResut.hasErrors()){
+			return "register.jsp";
+		}
+		submissionRepository.save(submission);
+		
+		redirectAttributes.addAttribute("submissionTitle", submission.getTitle());
+		return "redirect:/done";
+	}
+
+
+
+
+
+FlashAttributes
+
+mmm we dont really need this just in case .. 
+!! and update the jsp as before without param
+
+@RequestMapping(value = "/done" , method = RequestMethod.GET)
+    public String done(@ModelAttribute("submissionTitle") final String submissionTitle, Model model) {
+		model.addAttribute("submissionTitle", submissionTitle);
+		return "done.jsp";
+    }
+
+
+FULL CLASS
+
+package org.gochev;
+
+import java.io.Reader;
+
+import javax.validation.Valid;
+import javax.websocket.server.PathParam;
+
+import org.gochev.model.SessionLevel;
+import org.gochev.model.Submission;
+import org.gochev.repo.SubmissionRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
+@Controller
+public class SubmissionController {
+	
+	@Autowired
+	private SubmissionRepository submissionRepository;
+
+	@ResponseBody
+	@RequestMapping("/")
+	public String register() {
+		return "wohoo";
+	}
+
+//	@ModelAttribute("submission")
+//	public Submission getModel(){
+//		return new Submission();
+//	}
+//	
+	@RequestMapping(value = "/submit", method = RequestMethod.GET)
+	public String view(Model model){
+		model.addAttribute("levels", SessionLevel.values());
+		model.addAttribute("submission",new Submission());
+		return "register.jsp";
+	}
+	
+	@RequestMapping(value = "/submit", method = RequestMethod.POST)
+	public String submit(@Valid Submission submission, BindingResult submissionResut, RedirectAttributes redirectAttributes) {
+		if(submissionResut.hasErrors()){
+			return "register.jsp";
+		}
+		submissionRepository.save(submission);
+		
+		redirectAttributes.addFlashAttribute("submissionTitle", submission.getTitle());
+		return "redirect:/done";
+	}
+	
+	@ResponseBody
+	@RequestMapping(value = "/get/{id}", method = RequestMethod.GET)
+	public Submission submit(@PathVariable Long id) {
+		return submissionRepository.findOne(id);
+	}
+	
+	@RequestMapping(value = "/done" , method = RequestMethod.GET)
+    public String done(@ModelAttribute("submissionTitle") final String submissionTitle, Model model) {
+		model.addAttribute("submissionTitle", submissionTitle);
+		return "done.jsp";
+    }
+}
+	
+	
+	
+
+and update the jsp as before without param
+
+
