@@ -1,0 +1,3 @@
+org/delme/model/User.class
+org/delme/Application.class
+org/delme/repository/UserRepository.class
